@@ -1,0 +1,80 @@
+---
+title: "STAT 545B Assignment b1"
+author: "Joel Campbell"
+date: "2024-10-30"
+output: github_document
+---
+
+```{r plot_scatter} 
+
+#' Scatter Plots
+#' 
+#' @description 
+#'
+#' @param scatter_df A data frame containing at least two numeric columns
+#'
+#' @return A list containing scatter plots of all combinations of numeric columns
+#' @export
+#'
+#' @examples
+plot_scatter <- function(df_to_plot) {
+  # create a data frame containing only numeric columns from the passed param
+  plot_df <- df_to_plot %>%
+    select_if(is.numeric)
+  
+  # check to make sure there are at least 2 columns to plot in plot_df
+  expect_equal(
+    ncol(df) >= 2, 
+    TRUE, 
+    info = paste(
+      "Expected at least 2 numeric columns, but found ", 
+      ncol(plot_df)
+      )
+    )
+  
+  # use combn(simplify = FALSE) to create a list of all combinations of the
+  # numeric columns
+  scatter_combos <- combn(names(plot_df), 2, simplify = FALSE)
+  
+  # using map() from the purrr package and an anonymous function, generate 
+  # a list of scatter plots for each combination of numerical variables
+  scatter_plots <- map(scatter_combos, function(scatter) {
+      
+      ggplot(plot_df, aes(x = .data[[scatter[1]]], y = .data[[scatter[2]]])) + 
+      
+        # scatter plot
+        geom_point(color = "mediumblue", size = 2.5) +
+      
+        # linear trend line
+        geom_smooth(
+          method = "lm", 
+          se = FALSE, 
+          color = "black", 
+          linewidth = 2.5
+          ) +
+      
+        # label the axis based on the column combination 
+        labs(x = scatter[1], y = scatter[2]) +
+        
+        theme_classic() +
+  
+        theme(
+          axis.line = element_line(linewidth = 0.75),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.title.x = element_text(size = 7),
+          axis.title.y = element_text(size = 7),
+          axis.text.x = element_text(size = 7, angle = 60),
+          axis.text.y = element_text(size = 7)
+        )
+    })
+  
+  return(scatter_plots)
+  
+}
+
+```
+
+```{r }
